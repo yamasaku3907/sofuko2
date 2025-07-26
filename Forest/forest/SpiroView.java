@@ -14,6 +14,7 @@ public class SpiroView extends View {
      * @param aModel モデル (Modelのインスタンス) 
      */
     public SpiroView(SpiroModel aModel) {
+        super(aModel);
         // TODO: 実装する
     }
 
