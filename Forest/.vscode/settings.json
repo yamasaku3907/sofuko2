@@ -1,0 +1,6 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "/Users/nishimurayamato/Desktop/2025春学期授業/ソフトウェア工学Ⅱ/sofuko2/Forest/**/*.jar"
+    ]
+}
