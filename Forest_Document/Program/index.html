@@ -249,9 +249,112 @@ th {
 <hr>
 <h2>ソフトウェア工学II「樹状整列」プログラム</h2>
 <div class="belt">
-<h3><a name="KanseiSaseteKudasai">完成させてください</a></h3>
+<h3><a name="KanseiSaseteKudasai">プログラム一覧</a></h3>
 </div>
+<ul>
+  <li><a href="#Constants">Constants</a>（定数）
+  <li><a href="#Example">Example</a>（メインクラス）
+  <li><a href="#SpiroModel">SpiroModel</a>（モデル）
+  <li><a href="#SpiroView">SpiroView</a>（ビュー）
+  <li><a href="#SpiroController">SpiroController</a>（コントローラ）
+  <li><a href="#Forest">Forest</a>（フォレスト）
+  <li><a href="#Branch">Branch</a>（ブランチ）
+  <li><a href="#Node">Node</a>（ノード）
+</ul>
+<div class="belt">
+  <h3><a name="Constants">Constants (定数)</a></h3>
+</div>
+<pre>
+</pre>
+<div class="belt">
+  <h3><a name="Example" href="../TestSpecification/index.html#Example">Example (メインクラス)</a></h3>
+</div>
+<pre>package forest;
+
+import java.awt.Dimension;
+import java.io.File;
+import javax.swing.JFrame;
+
+/**
+ * 樹状整列の例題クラス：使い方の典型を示すのが目的のプログラムです。
+ * Makefileを用いた実行方法は以下の通りです。
+ * $ make tree  # 木を整列描画
+ * $ make forest  # 森を整列描画
+ * $ make semilattice  # 亜格子状の森を整列描画
+ */
+public class Example extends Object {
+	/**
+	 * 第1引数で樹状整列データファイルを受け取って樹状整列を実行します。
+	 * $ java -Dfile.encoding=UTF-8 -Xmx512m -Xss1024k -jar forest.jar resource/data/tree.txt
+	 * $ java -Dfile.encoding=UTF-8 -Xmx512m -Xss1024k -jar forest.jar resource/data/forest.txt
+	 * $ java -Dfile.encoding=UTF-8 -Xmx512m -Xss1024k -jar forest.jar resource/data/semilattice.txt
+	 * @param arguments 樹状整列データファイルを第1引数とする引数文字列群
+	 */
+	public static void main(String[] arguments) {
+		// 引数が無い（樹状整列データファイルの在り処がわからない）をチェックする。
+		if (arguments.length &lt; 1) {
+			System.err.println("There are too few arguments.");
+			System.exit(1);
+		}
+
+		// 第1引数で指定された樹状整列データファイルの存在をチェックする。
+		File aFile = new File(arguments[0]);
+		if (!(aFile.exists())) {
+			System.err.println("'" + aFile + "' does not exist.");
+			System.exit(1);
+		}
+
+		 // MVCを作成する。
+		ForestModel aModel = new ForestModel(aFile);
+		ForestView aView = new ForestView(aModel);
+
+		// ウィンドウを生成して開く。
+		JFrame aWindow = new JFrame(aFile.getName());
+		aWindow.getContentPane().add(aView);
+		aWindow.setMinimumSize(new Dimension(400, 300));
+		aWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		aWindow.setSize(800, 600);
+		aWindow.setLocationRelativeTo(null);
+		aWindow.setVisible(true);
+
+		// 樹状整列のアニメーションを行う。
+		aModel.animate();
+
+		return;
+	}
+}
+</pre>
+<div class="belt">
+  <h3><a name="SpiroModel" href="../TestSpecification/index.html#SpiroModel">SpiroModel (モデル)</a></h3>
+</div>
+<pre>
+</pre>
+<div class="belt">
+  <h3><a name="SpiroView" href="../TestSpecification/index.html#SpiroView">SpiroView (ビュー)</a></h3>
+</div>
+<pre>
+</pre>
+<div class="belt">
+  <h3><a name="SpiroController" href="../TestSpecification/index.html#SpiroController">SpiroController (コントローラ)</a></h3>
+</div>
+<pre>
+</pre>
+<div class="belt">
+  <h3><a name="Forest" href="../TestSpecification/index.html#Forest">Forest (フォレスト)</a></h3>
+</div>
+<pre>
+</pre>
+<div class="belt">
+  <h3><a name="Branch" href="../TestSpecification/index.html#Branch">Branch (ブランチ)</a></h3>
+</div>
+<pre>
+</pre>
+<div class="belt">
+  <h3><a name="Node" href="../TestSpecification/index.html#Node">Node (ノード)</a></h3>
+</div>
+<pre>
+</pre>
 <hr>
-<div class="right-small">Copyright 20xx Project xx, Updated: 2017/03/13 (Created: 2009/11/11)</div>
+<div class="right-small">Copyright 2025 Project software engineering II, Updated: 2025/07/27 (Created: 2025/07/27)</div>
 </body>
 </html>
