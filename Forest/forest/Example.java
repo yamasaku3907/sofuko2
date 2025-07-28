@@ -38,11 +38,9 @@ public class Example extends Object
 			System.exit(1);
 		}
 
-		/**********
-
 		 // MVCを作成する。
-		ForestModel aModel = new ForestModel(aFile);
-		ForestView aView = new ForestView(aModel);
+		SpiroModel aModel = new SpiroModel(aFile);
+		SpiroView aView = new SpiroView(aModel);
 
 		// ウィンドウを生成して開く。
 		JFrame aWindow = new JFrame(aFile.getName());
@@ -55,8 +53,6 @@ public class Example extends Object
 
 		// 樹状整列のアニメーションを行う。
 		aModel.animate();
-
-		**********/
 
 		return;
 	}
