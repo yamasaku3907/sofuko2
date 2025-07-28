@@ -4,6 +4,8 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * 樹状整列におけるフォレスト (木・林・森・亜格子状の森)を担うクラスになります。
@@ -29,7 +31,9 @@ public class Forest {
      * このクラスのインスタンスを生成するコンストラクタです。
      */
     public Forest() {
-        // TODO: 実装する
+        this.nodes = new ArrayList<>();
+        this.branches = new ArrayList<>();
+        this.bounds = new Rectangle(0, 0, 0, 0);
     }
 
     /**
@@ -37,7 +41,7 @@ public class Forest {
      * @param aBranch ブランチ (枝) 
      */
     public void addBranch(Branch aBranch) {
-        // TODO: 実装する
+        this.branches.add(aBranch);
     }
 
     /**
@@ -45,14 +49,14 @@ public class Forest {
      * @param aNode ノード (節) 
      */
     public void addNode(Node aNode) {
-        // TODO: 実装する
+        this.nodes.add(aNode);
     }
 
     /**
      * 樹状整列するトップ (一番上位)のメソッドです。
      */
     public void arrange() {
-        // TODO: 実装する
+        this.arrange(null);
     }
 
     /**
@@ -60,7 +64,17 @@ public class Forest {
      * @param aModel モデル 
      */
     public void arrange(SpiroModel aModel) {
-        // TODO: 実装する
+        this.flushBounds();
+        for (Node node : this.nodes) {
+            node.setStatus(Constants.UnVisited);
+        }
+        ArrayList<Node> roots = this.sortNodes(this.rootNodes());
+        Point currentTopLeft = new Point(Constants.Margin.x, Constants.Margin.y);
+        for (Node root : roots) {
+            if (root.getStatus().equals(Constants.Visited)) continue;
+            Point extent = this.arrange(root, new Point(currentTopLeft.x, currentTopLeft.y), aModel);
+            currentTopLeft.x += extent.x; // 次の木の開始位置をX軸方向にずらす
+        }
     }
 
     /**
@@ -71,8 +85,36 @@ public class Forest {
      * @return 樹状整列に必要だった大きさ(幅と高さ) 
      */
     protected Point arrange(Node aNode, Point aPoint, SpiroModel aModel) {
-        // TODO: 実装する
-        return null;
+        if (aNode.getStatus().equals(Constants.Visited)) return new Point(0, 0);
+
+        aNode.setStatus(Constants.Visited);
+        ArrayList<Node> subNodes = this.sortNodes(this.subNodes(aNode));
+
+        Point subTreesExtent = new Point(0, 0);
+        Point currentSubPoint = new Point(aPoint.x, aPoint.y + aNode.getExtent().y + Constants.Interval.y);
+
+        for (Node subNode : subNodes) {
+            Point childExtent = this.arrange(subNode, new Point(currentSubPoint.x, currentSubPoint.y), aModel);
+            currentSubPoint.x += childExtent.x;
+            subTreesExtent.x += childExtent.x;
+            subTreesExtent.y = Math.max(subTreesExtent.y, childExtent.y);
+        }
+
+        int nodeWidth = aNode.getExtent().x;
+        int childrenWidth = subTreesExtent.x > 0 ? subTreesExtent.x - Constants.Interval.x : 0;
+        int nodeX = aPoint.x + Math.max(0, (childrenWidth - nodeWidth) / 2);
+        aNode.setLocation(new Point(nodeX, aPoint.y));
+
+        if (aModel != null) {
+            this.propagate(aModel);
+        }
+
+        int totalWidth = Math.max(nodeWidth, childrenWidth);
+        int totalHeight = aNode.getExtent().y + (subNodes.isEmpty() ? 0 : Constants.Interval.y + subTreesExtent.y);
+
+        this.bounds.add(aNode.getBounds());
+
+        return new Point(totalWidth + Constants.Interval.x, totalHeight);
     }
 
     /**
@@ -80,8 +122,7 @@ public class Forest {
      * @return フォレスト領域 (矩形) 
      */
     public Rectangle bounds() {
-        // TODO: 実装する
-        return null;
+        return this.bounds;
     }
 
     /**
@@ -89,14 +130,19 @@ public class Forest {
      * @param aGraphics グラフィクス (描画コンテクスト) 
      */
     public void draw(Graphics aGraphics) {
-        // TODO: 実装する
+        for (Branch branch : this.branches) {
+            branch.draw(aGraphics);
+        }
+        for (Node node : this.nodes) {
+            node.draw(aGraphics);
+        }
     }
 
     /**
      * フォレスト(木・林・森・亜格子状の森)の領域 (矩形)を水に流す(チャラにする) メソッドです。
      */
     public void flushBounds() {
-        // TODO: 実装する
+        this.bounds = new Rectangle(0, 0, Constants.Margin.x, Constants.Margin.y);
     }
 
     /**
@@ -104,7 +150,14 @@ public class Forest {
      * @param aModel モデル 
      */
     protected void propagate(SpiroModel aModel) {
-        // TODO: 実装する
+        try {
+            Thread.sleep(Constants.SleepTick);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if (aModel != null) {
+            aModel.changed();
+        }
     }
 
     /**
@@ -112,8 +165,13 @@ public class Forest {
      * @return ルートノード群 
      */
     public ArrayList<Node> rootNodes() {
-        // TODO: 実装する
-        return null;
+        ArrayList<Node> roots = new ArrayList<>();
+        for (Node aNode : this.nodes) {
+            if (this.superNodes(aNode).isEmpty()) {
+                roots.add(aNode);
+            }
+        }
+        return roots;
     }
 
     /**
@@ -122,8 +180,8 @@ public class Forest {
      * @return ソートされたノード群 
      */
     protected ArrayList<Node> sortNodes(ArrayList<Node> nodeCollection) {
-        // TODO: 実装する
-        return null;
+        Collections.sort(nodeCollection, Comparator.comparing(Node::getName));
+        return nodeCollection;
     }
 
     /**
@@ -132,8 +190,13 @@ public class Forest {
      * @return サブノード群 
      */
     public ArrayList<Node> subNodes(Node aNode) {
-        // TODO: 実装する
-        return null;
+        ArrayList<Node> subs = new ArrayList<>();
+        for (Branch aBranch : this.branches) {
+            if (aBranch.start().equals(aNode)) {
+                subs.add(aBranch.end());
+            }
+        }
+        return subs;
     }
 
     /**
@@ -142,8 +205,13 @@ public class Forest {
      * @return スーパーノード群 
      */
     public ArrayList<Node> superNodes(Node aNode) {
-        // TODO: 実装する
-        return null;
+        ArrayList<Node> supers = new ArrayList<>();
+        for (Branch aBranch : this.branches) {
+            if (aBranch.end().equals(aNode)) {
+                supers.add(aBranch.start());
+            }
+        }
+        return supers;
     }
 
     /**
@@ -152,8 +220,7 @@ public class Forest {
      */
     @Override
     public String toString() {
-        // TODO: 実装する
-        return super.toString();
+        return "[Forest=" + this.nodes.size() + " nodes, " + this.branches.size() + " branches]";
     }
 
     /**
@@ -161,8 +228,14 @@ public class Forest {
      * @param aPoint 位置 (モデル座標) 
      * @return ノード、もしも見つからなかった場合には、nullを応答します。
      */
-    public Node which0fNodes(Point aPoint) {
-        // TODO: 実装する
+    public Node whichOfNodes(Point aPoint) {
+        // 描画が後になるもの（手前にあるもの）から探索
+        for (int i = this.nodes.size() - 1; i >= 0; i--) {
+            Node node = this.nodes.get(i);
+            if (node.getBounds().contains(aPoint)) {
+                return node;
+            }
+        }
         return null;
     }
 }
