@@ -4,6 +4,7 @@ import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.FontMetrics;
 
 /**
  * 樹状整列におけるノード (節)を担うクラスになります。
@@ -35,7 +36,15 @@ public class Node extends Component {
      * @param aString ノード名: ラベル文字列 
      */
     public Node(String aString) {
-        // TODO: 実装する
+        super();
+        this.name = aString;
+        this.location = new Point(0, 0);
+        this.status = Constants.UnKnown;
+        // フォント情報を基にノードの大きさを計算
+        this.setFont(Constants.DefaultFont);
+        int width = this.stringWidth(aString) + Constants.Margin.x * 2;
+        int height = this.stringHeight(aString) + Constants.Margin.y * 2;
+        this.extent = new Point(width, height);
     }
 
     /**
@@ -43,7 +52,17 @@ public class Node extends Component {
      * @param aGraphics グラフィクス (描画コンテクスト) 
      */
     public void draw(Graphics aGraphics) {
-        // TODO: 実装する
+         // ノードの矩形を描画
+        aGraphics.setColor(Constants.BackgroundColor);
+        aGraphics.fillRect(this.location.x, this.location.y, this.extent.x, this.extent.y);
+        aGraphics.setColor(Constants.ForegroundColor);
+        aGraphics.drawRect(this.location.x, this.location.y, this.extent.x, this.extent.y);
+
+        // ノード名を描画
+        FontMetrics metrics = aGraphics.getFontMetrics();
+        int strX = this.location.x + Constants.Margin.x;
+        int strY = this.location.y + metrics.getAscent() + Constants.Margin.y;
+        aGraphics.drawString(this.name, strX, strY);
     }
 
     /**
@@ -52,8 +71,7 @@ public class Node extends Component {
      */
     @Override
     public Rectangle getBounds() {
-        // TODO: 実装する
-        return super.getBounds();
+        return new Rectangle(this.location, new java.awt.Dimension(this.extent.x, this.extent.y));
     }
 
     /**
@@ -61,8 +79,7 @@ public class Node extends Component {
      * @return ノード(節)の大きさ (幅と高さ) 
      */
     public Point getExtent() {
-        // TODO: 実装する
-        return null;
+        return this.extent;
     }
 
     /**
@@ -71,8 +88,7 @@ public class Node extends Component {
      */
     @Override
     public Point getLocation() {
-        // TODO: 実装する
-        return super.getLocation();
+        return this.location;
     }
 
     /**
@@ -81,8 +97,7 @@ public class Node extends Component {
      */
     @Override
     public String getName() {
-        // TODO: 実装する
-        return super.getName();
+        return this.name;
     }
 
     /**
@@ -90,8 +105,7 @@ public class Node extends Component {
      * @return ノードの状態 
      */
     public Integer getStatus() {
-        // TODO: 実装する
-        return null;
+        return this.status;
     }
 
     /**
@@ -99,7 +113,7 @@ public class Node extends Component {
      * @param aPoint ノードの大きさ(幅と高さ) 
      */
     public void setExtent(Point aPoint) {
-        // TODO: 実装する
+        this.extent = aPoint;
     }
 
     /**
@@ -108,7 +122,7 @@ public class Node extends Component {
      */
     @Override
     public void setLocation(Point aPoint) {
-        // TODO: 実装する
+        this.location = aPoint;
     }
 
     /**
@@ -117,7 +131,7 @@ public class Node extends Component {
      */
     @Override
     public void setName(String aString) {
-        // TODO: 実装する
+        this.name = aString;
     }
 
     /**
@@ -125,7 +139,7 @@ public class Node extends Component {
      * @param anInteger ノードの状態 
      */
     public void setStatus(Integer anInteger) {
-        // TODO: 実装する
+        this.status = anInteger;
     }
 
     /**
@@ -134,8 +148,8 @@ public class Node extends Component {
      * @return 文字列の高さ 
      */
     protected int stringHeight(String string) {
-        // TODO: 実装する
-        return 0;
+        FontMetrics metrics = this.getFontMetrics(this.getFont());
+        return metrics.getHeight();
     }
 
     /**
@@ -144,8 +158,8 @@ public class Node extends Component {
      * @return 文字列の幅 
      */
     protected int stringWidth(String string) {
-        // TODO: 実装する
-        return 0;
+        FontMetrics metrics = this.getFontMetrics(this.getFont());
+        return metrics.stringWidth(string);
     }
 
     /**
@@ -154,7 +168,6 @@ public class Node extends Component {
      */
     @Override
     public String toString() {
-        // TODO: 実装する
-        return super.toString();
+        return "[Node=" + this.name + "]";
     }
 }
