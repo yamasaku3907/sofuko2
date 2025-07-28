@@ -2,6 +2,13 @@ package forest;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import mvc.Model;
 
 /**
@@ -19,21 +26,26 @@ public class SpiroModel extends Model {
      * @param aFile 樹状整列データファイル 
      */
     public SpiroModel(File aFile) {
-        // TODO: 実装する
+        super();
+		this.read(aFile);
     }
 
     /**
      * アニメーションを行うメソッドです。
      */
     public void animate() {
-        // TODO: 実装する
+        // TODO: ステップ4で実装
+		// this.forest.propagate(this);
+		this.changed(); // Modelが変更されたことを通知
     }
 
     /**
      * 樹状整列を行うメソッドです。
      */
     public void arrange() {
-        // TODO: 実装する
+        // TODO: ステップ3で実装
+		this.forest.arrange();
+		this.changed(); // Modelが変更されたことを通知
     }
 
     /**
@@ -41,7 +53,7 @@ public class SpiroModel extends Model {
      */
     @Override
     public void changed() {
-        // TODO: 実装する
+        super.changed();
     }
 
     /**
@@ -49,8 +61,7 @@ public class SpiroModel extends Model {
      * @return 樹状整列それ自身 
      */
     public Forest forest() {
-        // TODO: 実装する
-        return null;
+        return this.forest;
     }
 
     /**
@@ -58,7 +69,54 @@ public class SpiroModel extends Model {
      * @param aFile 樹状整列データファイル 
      */
     protected void read(File aFile) {
-        // TODO: 実装する
+        // 新しいForestインスタンスを作成
+		this.forest = new Forest();
+		// IDをキーにしてNodeを高速に検索するための一時的なMap
+		Map<Integer, Node> nodeMap = new HashMap<Integer, Node>();
+		String aLine = null;
+		// 現在読み込んでいるセクションを記憶する変数
+		String currentSection = null;
+
+		try (BufferedReader reader = new BufferedReader(new FileReader(aFile)))
+		{
+			while ((aLine = reader.readLine()) != null)
+			{
+				aLine = aLine.trim();
+				if (aLine.isEmpty()) { continue; }
+
+				// セクションの判定
+				if (aLine.equals(Constants.TagOfNodes)) { currentSection = "nodes"; continue; }
+				if (aLine.equals(Constants.TagOfBranches)) { currentSection = "branches"; continue; }
+				if (aLine.equals(Constants.TagOfTrees)) { currentSection = "trees"; continue; }
+
+				// 各セクションの処理
+				if ("nodes".equals(currentSection))
+				{
+					String[] parts = aLine.split(",", 2);
+					if (parts.length < 2) { continue; }
+					Integer id = Integer.valueOf(parts[0].trim());
+					String name = parts[1].trim();
+					Node aNode = new Node(name);
+					this.forest.addNode(aNode);
+					nodeMap.put(id, aNode);
+				}
+				else if ("branches".equals(currentSection))
+				{
+					String[] parts = aLine.split(",", 2);
+					if (parts.length < 2) { continue; }
+					Integer fromId = Integer.valueOf(parts[0].trim());
+					Integer toId = Integer.valueOf(parts[1].trim());
+					Node fromNode = nodeMap.get(fromId);
+					Node toNode = nodeMap.get(toId);
+					if (fromNode != null && toNode != null)
+					{
+						Branch aBranch = new Branch(fromNode, toNode);
+						this.forest.addBranch(aBranch);
+					}
+				}
+			}
+		}
+		catch (IOException e) { e.printStackTrace(); }
     }
 
     /**

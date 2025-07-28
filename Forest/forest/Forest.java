@@ -29,7 +29,10 @@ public class Forest {
      * このクラスのインスタンスを生成するコンストラクタです。
      */
     public Forest() {
-        // TODO: 実装する
+        super();
+		this.nodes = new ArrayList<Node>();
+		this.branches = new ArrayList<Branch>();
+		this.bounds = new Rectangle(0, 0, 0, 0);
     }
 
     /**
@@ -37,7 +40,7 @@ public class Forest {
      * @param aBranch ブランチ (枝) 
      */
     public void addBranch(Branch aBranch) {
-        // TODO: 実装する
+        this.branches.add(aBranch);
     }
 
     /**
@@ -45,7 +48,7 @@ public class Forest {
      * @param aNode ノード (節) 
      */
     public void addNode(Node aNode) {
-        // TODO: 実装する
+        this.nodes.add(aNode);
     }
 
     /**
@@ -89,7 +92,15 @@ public class Forest {
      * @param aGraphics グラフィクス (描画コンテクスト) 
      */
     public void draw(Graphics aGraphics) {
-        // TODO: 実装する
+        // 保持している全てのブランチとノードを描画する
+		for (Branch aBranch : this.branches)
+		{
+			aBranch.draw(aGraphics);
+		}
+		for (Node aNode : this.nodes)
+		{
+			aNode.draw(aGraphics);
+		}
     }
 
     /**
@@ -132,8 +143,16 @@ public class Forest {
      * @return サブノード群 
      */
     public ArrayList<Node> subNodes(Node aNode) {
-        // TODO: 実装する
-        return null;
+        ArrayList<Node> subNodes = new ArrayList<Node>();
+		for (Branch aBranch : this.branches)
+		{
+			if (aBranch.start() == aNode)
+			{
+				subNodes.add(aBranch.end());
+			}
+		}
+		return subNodes;
+
     }
 
     /**
@@ -152,8 +171,7 @@ public class Forest {
      */
     @Override
     public String toString() {
-        // TODO: 実装する
-        return super.toString();
+        return "Forest(nodes: " + this.nodes.size() + ", branches: " + this.branches.size() + ")";
     }
 
     /**
@@ -161,7 +179,7 @@ public class Forest {
      * @param aPoint 位置 (モデル座標) 
      * @return ノード、もしも見つからなかった場合には、nullを応答します。
      */
-    public Node which0fNodes(Point aPoint) {
+    public Node whichOfNodes(Point aPoint) {
         // TODO: 実装する
         return null;
     }

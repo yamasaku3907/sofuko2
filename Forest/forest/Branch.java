@@ -1,6 +1,7 @@
 package forest;
 
 import java.awt.Graphics;
+import java.awt.Point;
 
 /**
  * 樹状整列におけるブランチ (枝) を担うクラスになります。
@@ -24,7 +25,9 @@ public class Branch {
      * @param to   ブランチ (枝) の終点となるノード
      */
     public Branch(Node from, Node to) {
-        // TODO: 実装する
+        super();
+		this.start = from;
+		this.end = to;
     }
 
     /**
@@ -33,7 +36,10 @@ public class Branch {
      * @param aGraphics グラフィクス (描画コンテクスト)
      */
     public void draw(Graphics aGraphics) {
-        // TODO: 実装する
+        // 始点ノードと終点ノードの中心座標を計算して線を引く
+		Point startCenter = new Point(start.getLocation().x + start.getExtent().x / 2, start.getLocation().y + start.getExtent().y / 2);
+        Point endCenter = new Point(end.getLocation().x + end.getExtent().x / 2, end.getLocation().y + end.getExtent().y / 2);
+        aGraphics.drawLine(startCenter.x, startCenter.y, endCenter.x, endCenter.y);
     }
 
     /**
@@ -42,8 +48,7 @@ public class Branch {
      * @return 終点ノード
      */
     public Node end() {
-        // TODO: 実装する
-        return null;
+        return this.end;
     }
 
     /**
@@ -52,8 +57,7 @@ public class Branch {
      * @return 始点ノード
      */
     public Node start() {
-        // TODO: 実装する
-        return null;
+        return this.start;
     }
 
     /**
@@ -63,7 +67,6 @@ public class Branch {
      */
     @Override
     public String toString() {
-        // TODO: 実装する
-        return super.toString();
+        return "Branch(" + this.start.getName() + " -> " + this.end.getName() + ")";
     }
 }
