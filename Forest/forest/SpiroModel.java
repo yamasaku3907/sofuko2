@@ -3,6 +3,11 @@ package forest;
 import java.io.File;
 import java.util.ArrayList;
 import mvc.Model;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 樹状整列におけるMVCのモデル (M) を担うクラスになります。
@@ -19,21 +24,31 @@ public class SpiroModel extends Model {
      * @param aFile 樹状整列データファイル 
      */
     public SpiroModel(File aFile) {
-        // TODO: 実装する
+        super();
+        this.read(aFile);
+        if (this.forest != null) {
+            this.arrange();
+        }
     }
 
     /**
      * アニメーションを行うメソッドです。
      */
     public void animate() {
-        // TODO: 実装する
+        if (this.forest == null) return;
+        // UIをブロックしないように別スレッドでアニメーションを実行
+        new Thread(() -> {
+            this.forest.arrange(this);
+        }).start();
     }
 
     /**
      * 樹状整列を行うメソッドです。
      */
     public void arrange() {
-        // TODO: 実装する
+        if (this.forest == null) return;
+        this.forest.arrange();
+        this.changed();
     }
 
     /**
@@ -41,7 +56,7 @@ public class SpiroModel extends Model {
      */
     @Override
     public void changed() {
-        // TODO: 実装する
+        super.changed();
     }
 
     /**
@@ -49,8 +64,7 @@ public class SpiroModel extends Model {
      * @return 樹状整列それ自身 
      */
     public Forest forest() {
-        // TODO: 実装する
-        return null;
+        return this.forest;
     }
 
     /**
@@ -58,7 +72,47 @@ public class SpiroModel extends Model {
      * @param aFile 樹状整列データファイル 
      */
     protected void read(File aFile) {
-        // TODO: 実装する
+        this.forest = new Forest();
+        Map<String, Node> nodeMap = new HashMap<>();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(aFile))) {
+            String line;
+            String currentSection = "";
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty() || line.startsWith(Constants.TagOfTrees)) {
+                    continue;
+                }
+
+                if (line.equalsIgnoreCase(Constants.TagOfNodes)) {
+                    currentSection = Constants.TagOfNodes;
+                    continue;
+                } else if (line.equalsIgnoreCase(Constants.TagOfBranches)) {
+                    currentSection = Constants.TagOfBranches;
+                    continue;
+                }
+
+                String[] parts = line.split(",", 2);
+                if (parts.length < 2) continue;
+
+                if (currentSection.equals(Constants.TagOfNodes)) {
+                    String id = parts[0].trim();
+                    String name = parts[1].trim();
+                    Node node = new Node(name);
+                    nodeMap.put(id, node);
+                    this.forest.addNode(node);
+                } else if (currentSection.equals(Constants.TagOfBranches)) {
+                    Node fromNode = nodeMap.get(parts[0].trim());
+                    Node toNode = nodeMap.get(parts[1].trim());
+                    if (fromNode != null && toNode != null) {
+                        this.forest.addBranch(new Branch(fromNode, toNode));
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            this.forest = null; // 読み込み失敗
+        }
     }
 
     /**
@@ -66,8 +120,9 @@ public class SpiroModel extends Model {
      * @return ルートノード、ただし、見つからないときはnull 
      */
     public Node root() {
-        // TODO: 実装する
-        return null;
+        if (this.forest == null) return null;
+        ArrayList<Node> roots = this.forest.rootNodes();
+        return roots.isEmpty() ? null : roots.get(0);
     }
 
     /**
@@ -75,7 +130,7 @@ public class SpiroModel extends Model {
      * @return ルートノードたち、ただし、見つからないときは空リスト 
      */
     public ArrayList<Node> roots() {
-        // TODO: 実装する
-        return null;
+        if (this.forest == null) return new ArrayList<Node>();
+        return this.forest.rootNodes();
     }
 }
