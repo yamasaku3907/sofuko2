@@ -38,7 +38,7 @@ public class SpiroModel extends Model {
      */
     public void animate() {
         if (this.forest == null) return;
-        this.forest.arrange();
+        this.forest.arrange(this);
 		this.changed();
     }
 
