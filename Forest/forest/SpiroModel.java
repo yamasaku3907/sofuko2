@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.SwingUtilities;
+
 /**
  * 樹状整列におけるMVCのモデル (M) を担うクラスになります。
  */
@@ -36,10 +38,8 @@ public class SpiroModel extends Model {
      */
     public void animate() {
         if (this.forest == null) return;
-        // UIをブロックしないように別スレッドでアニメーションを実行
-        new Thread(() -> {
-            this.forest.arrange(this);
-        }).start();
+        this.forest.arrange();
+		this.changed();
     }
 
     /**
@@ -56,7 +56,9 @@ public class SpiroModel extends Model {
      */
     @Override
     public void changed() {
-        super.changed();
+        SwingUtilities.invokeLater(() -> {
+            super.changed(); // これがViewのupdate() -> repaint()を呼び出します
+        });
     }
 
     /**
