@@ -8,27 +8,27 @@ import java.util.Collections;
 import java.util.Comparator;
 
 /**
- * 樹状整列におけるフォレスト (木・林・森・亜格子状の森)を担うクラスになります。
+ * 樹状整列におけるフォレスト (木・林・森・亜格子状の森)を担うクラス。
  */
 public class Forest {
 
     /**
-     * ノード(節)群(たち)を記憶するフィールドです。
+     * ノード(節)群(たち)を記憶するフィールド。
      */
     private ArrayList<Node> nodes;
 
     /**
-     * ブランチ(枝) 群(たち)を記憶するフィールドです。
+     * ブランチ(枝) 群(たち)を記憶するフィールド。
      */
     private ArrayList<Branch> branches;
 
     /**
-     * 樹状整列したフォレスト (森)の領域 (矩形)を記憶するフィールドです。
+     * 樹状整列したフォレスト (森)の領域 (矩形)を記憶するフィールド。
      */
     private Rectangle bounds;
 
     /**
-     * このクラスのインスタンスを生成するコンストラクタです。
+     * このクラスのインスタンスを生成するコンストラクタ。
      */
     public Forest() {
         this.nodes = new ArrayList<>();
@@ -37,7 +37,7 @@ public class Forest {
     }
 
     /**
-     * ブランチ(枝)を追加するメソッドです。
+     * ブランチ(枝)を追加するメソッド。
      * @param aBranch ブランチ (枝) 
      */
     public void addBranch(Branch aBranch) {
@@ -45,7 +45,7 @@ public class Forest {
     }
 
     /**
-     * ノード(節)を追加するメソッドです。
+     * ノード(節)を追加するメソッド。
      * @param aNode ノード (節) 
      */
     public void addNode(Node aNode) {
@@ -53,80 +53,93 @@ public class Forest {
     }
 
     /**
-     * 樹状整列するトップ (一番上位)のメソッドです。
+     * 樹状整列するトップ (一番上位)のメソッド。
      */
     public void arrange() {
         this.arrange(null);
     }
 
     /**
-     * 樹状整列するセカンドレベル(二番階層) のメソッドです。
+     * 樹状整列するセカンドレベル(二番階層) のメソッド。
      * @param aModel モデル 
      */
     public void arrange(SpiroModel aModel) {
-        this.flushBounds();
+        Integer counter = 0;
         for (Node node : this.nodes) {
+            Integer height = node.getExtent().y + Constants.Margin.y + Constants.Interval.y;
             node.setStatus(Constants.UnVisited);
+            node.setLocation(new Point(0, height*counter++));
         }
-        ArrayList<Node> roots = this.sortNodes(this.rootNodes());
-        Point currentTopLeft = new Point(Constants.Margin.x, Constants.Margin.y);
-        for (Node root : roots) {
-            if (root.getStatus().equals(Constants.Visited)) continue;
-            Point extent = this.arrange(root, new Point(currentTopLeft.x, currentTopLeft.y), aModel);
-            currentTopLeft.x += extent.x; // 次の木の開始位置をX軸方向にずらす
+
+        Point aPoint = new Point(0,0);
+		ArrayList<Node> rootNodes = this.rootNodes();
+        for (Node node: rootNodes) {
+            Point secondPoint = this.arrange(node, aPoint, aModel);
+			aPoint = new Point(0, secondPoint.y + Constants.Interval.y);
         }
+        this.flushBounds();
     }
 
     /**
-     * 樹状整列する再帰レベル (N番階層) のメソッドです。
+     * 樹状整列する再帰レベル (N番階層) のメソッド。
      * @param aNode ノード 
      * @param aPoint ノードの位置(座標) 
      * @param aModel モデル (nullのときはアニメーションを行わない) 
      * @return 樹状整列に必要だった大きさ(幅と高さ) 
      */
     protected Point arrange(Node aNode, Point aPoint, SpiroModel aModel) {
-        if (aNode.getStatus().equals(Constants.Visited)) return new Point(0, 0);
-
         aNode.setStatus(Constants.Visited);
+        
         ArrayList<Node> subNodes = this.sortNodes(this.subNodes(aNode));
+        if (subNodes.isEmpty()) {
+            // 子がいない場合、自身の位置を確定して自身のサイズを返す
+            aNode.setLocation(aPoint);
+            this.propagate(aModel);
+            return new Point(aNode.getExtent().x, aNode.getExtent().y);
+        }
 
-        Point subTreesExtent = new Point(0, 0);
-        Point currentSubPoint = new Point(aPoint.x, aPoint.y + aNode.getExtent().y + Constants.Interval.y);
+        // 子ノードたちを再帰的に配置
+        Point subTreeStartPoint = new Point(aPoint.x + aNode.getExtent().x + Constants.Interval.x, aPoint.y);
+        int totalSubTreeHeight = 0;
+        int maxSubTreeWidth = 0;
 
         for (Node subNode : subNodes) {
-            Point childExtent = this.arrange(subNode, new Point(currentSubPoint.x, currentSubPoint.y), aModel);
-            currentSubPoint.x += childExtent.x;
-            subTreesExtent.x += childExtent.x;
-            subTreesExtent.y = Math.max(subTreesExtent.y, childExtent.y);
+            Point childStartPoint = new Point(subTreeStartPoint.x, subTreeStartPoint.y + totalSubTreeHeight);
+            Point childExtent = this.arrange(subNode, childStartPoint, aModel);
+            // 子ノードが使った高さと、子ノード同士の間隔を加算
+            totalSubTreeHeight += childExtent.y + Constants.Interval.y;
+            maxSubTreeWidth = Math.max(maxSubTreeWidth, childExtent.x);
         }
-
-        int nodeWidth = aNode.getExtent().x;
-        int childrenWidth = subTreesExtent.x > 0 ? subTreesExtent.x - Constants.Interval.x : 0;
-        int nodeX = aPoint.x + Math.max(0, (childrenWidth - nodeWidth) / 2);
-        aNode.setLocation(new Point(nodeX, aPoint.y));
-
-        if (aModel != null) {
-            this.propagate(aModel);
+        // 最後のノードの下の間隔は不要なので引く
+        if (totalSubTreeHeight > 0) {
+            totalSubTreeHeight -= Constants.Interval.y;
         }
+        
+        // 親ノードのY座標を、子ノード群の高さの中心にくるように計算
+        int middleOfChildren = subTreeStartPoint.y + (totalSubTreeHeight / 2);
+        int newParentY = middleOfChildren - (aNode.getExtent().y / 2);
+        aNode.setLocation(new Point(aPoint.x, newParentY));
+        this.propagate(aModel); // 親ノードの位置を更新したので再描画
 
-        int totalWidth = Math.max(nodeWidth, childrenWidth);
-        int totalHeight = aNode.getExtent().y + (subNodes.isEmpty() ? 0 : Constants.Interval.y + subTreesExtent.y);
+        // この部分木全体が占める幅と高さを計算
+        int totalWidth = aNode.getExtent().x + Constants.Interval.x + maxSubTreeWidth;
+        int totalHeight = Math.max(aNode.getExtent().y, totalSubTreeHeight);
 
-        this.bounds.add(aNode.getBounds());
-
-        return new Point(totalWidth + Constants.Interval.x, totalHeight);
+        return new Point(totalWidth, totalHeight);
     }
 
     /**
-     * フォレスト(木・林・森・亜格子状の森) の領域 (矩形)を応答するメソッドです。
+     * フォレスト(木・林・森・亜格子状の森) の領域 (矩形)を応答するメソッド。
      * @return フォレスト領域 (矩形) 
      */
     public Rectangle bounds() {
+        this.bounds = new Rectangle();
+        this.nodes.forEach(aNode -> this.bounds.add(aNode.getBounds()));
         return this.bounds;
     }
 
     /**
-     * フォレスト(木・林・森・亜格子状の森)を描画するメソッドです。
+     * フォレスト(木・林・森・亜格子状の森)を描画するメソッド。
      * @param aGraphics グラフィクス (描画コンテクスト) 
      */
     public void draw(Graphics aGraphics) {
@@ -139,14 +152,14 @@ public class Forest {
     }
 
     /**
-     * フォレスト(木・林・森・亜格子状の森)の領域 (矩形)を水に流す(チャラにする) メソッドです。
+     * フォレスト(木・林・森・亜格子状の森)の領域 (矩形)を水に流す(チャラにする) メソッド。
      */
     public void flushBounds() {
         this.bounds = new Rectangle(0, 0, Constants.Margin.x, Constants.Margin.y);
     }
 
     /**
-     * チックタックの間、スリープし、モデルが変化した、と騒ぐ(広める: 放送する) メソッドです。
+     * チックタックの間、スリープし、モデルが変化した、と騒ぐ(広める: 放送する) メソッド。
      * @param aModel モデル 
      */
     protected void propagate(SpiroModel aModel) {
@@ -161,7 +174,7 @@ public class Forest {
     }
 
     /**
-     * フォレストの根元 (ルート)となるノード群を応答するメソッドです。
+     * フォレストの根元 (ルート)となるノード群を応答するメソッド。
      * @return ルートノード群 
      */
     public ArrayList<Node> rootNodes() {
@@ -175,7 +188,7 @@ public class Forest {
     }
 
     /**
-     * 引数で指定されたノード群をノード名でソート (並び替えを)するメソッドです。
+     * 引数で指定されたノード群をノード名でソート (並び替えを)するメソッド。
      * @param nodeCollection ノード群 
      * @return ソートされたノード群 
      */
@@ -185,7 +198,7 @@ public class Forest {
     }
 
     /**
-     * 引数で指定されたノードのサブノード群を応答するメソッドです。
+     * 引数で指定されたノードのサブノード群を応答するメソッド。
      * @param aNode ノード 
      * @return サブノード群 
      */
@@ -200,7 +213,7 @@ public class Forest {
     }
 
     /**
-     * 引数で指定されたノードのスーパーノード群を応答するメソッドです。
+     * 引数で指定されたノードのスーパーノード群を応答するメソッド。
      * @param aNode ノード 
      * @return スーパーノード群 
      */
