@@ -1,5 +1,6 @@
 package forest;
 
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 import mvc.Controller;
 
@@ -12,7 +13,7 @@ public class SpiroController extends Controller {
      * このクラスのインスタンスを生成するコンストラクタです。
      */
     public SpiroController() {
-        // TODO: 実装する
+        super();
     }
 
     /**
@@ -21,6 +22,18 @@ public class SpiroController extends Controller {
      */
     @Override
     public void mouseClicked(MouseEvent aMouseEvent) {
-        // TODO: 実装する
+        Point aPoint = aMouseEvent.getPoint();
+        SpiroView aView = (SpiroView) super.view;
+        Node aNode = aView.whichOfNodes(aPoint);
+
+        if (aNode != null) {
+            System.out.println("Clicked on: " + aNode.getName());
+        }
+
+        // クリックされたらアニメーションを再度実行する
+        SpiroModel aModel = (SpiroModel) super.model;
+        if (aModel != null) {
+            aModel.animate();
+        }
     }
 }
