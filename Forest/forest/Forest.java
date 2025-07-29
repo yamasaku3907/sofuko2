@@ -89,43 +89,57 @@ public class Forest {
      */
     protected Point arrange(Node aNode, Point aPoint, SpiroModel aModel) {
         aNode.setStatus(Constants.Visited);
-        
+        aNode.setLocation(aPoint);
+        this.propagate(aModel);
+
+        Point extent = aNode.getExtent();
         ArrayList<Node> subNodes = this.sortNodes(this.subNodes(aNode));
+        
+        // 子ノードがいない場合（ベースケース）
         if (subNodes.isEmpty()) {
-            // 子がいない場合、自身の位置を確定して自身のサイズを返す
-            aNode.setLocation(aPoint);
-            this.propagate(aModel);
-            return new Point(aNode.getExtent().x, aNode.getExtent().y);
+            Integer width = aPoint.x + extent.x;
+            Integer height = aPoint.y + extent.y;
+            return new Point(width, height);
         }
 
-        // 子ノードたちを再帰的に配置
-        Point subTreeStartPoint = new Point(aPoint.x + aNode.getExtent().x + Constants.Interval.x, aPoint.y);
-        int totalSubTreeHeight = 0;
-        int maxSubTreeWidth = 0;
+        // 再帰ステップ
+        Integer width = aPoint.x + extent.x;
+        Integer height = aPoint.y;
+        Integer x = width + Constants.Interval.x;
+        Integer y = height;
+        Integer top = height; // サブツリーの上端を記録
 
         for (Node subNode : subNodes) {
-            Point childStartPoint = new Point(subTreeStartPoint.x, subTreeStartPoint.y + totalSubTreeHeight);
-            Point childExtent = this.arrange(subNode, childStartPoint, aModel);
-            // 子ノードが使った高さと、子ノード同士の間隔を加算
-            totalSubTreeHeight += childExtent.y + Constants.Interval.y;
-            maxSubTreeWidth = Math.max(maxSubTreeWidth, childExtent.x);
+            if (subNode.getStatus() == Constants.UnVisited) {
+                // 再帰呼び出しから返ってくるのは、サブツリーの右下の絶対座標
+                Point subTreeBounds = this.arrange(subNode, new Point(x, y), aModel);
+
+                // y座標は、これまで配置したサブツリーの中で最も低い位置を記録する
+                Integer currentBottom = y + subNode.getExtent().y;
+                y = subTreeBounds.y > currentBottom ? subTreeBounds.y : currentBottom;
+                
+                // 全体の幅と高さを更新
+                width = subTreeBounds.x > width ? subTreeBounds.x : width;
+                height = subTreeBounds.y > height ? subTreeBounds.y : height;
+
+                // 次のサブツリーの開始位置のために、y座標に間隔を加える
+                y = y + Constants.Interval.y;
+            }
         }
-        // 最後のノードの下の間隔は不要なので引く
-        if (totalSubTreeHeight > 0) {
-            totalSubTreeHeight -= Constants.Interval.y;
+
+        y = y - Constants.Interval.y; // 最後の間隔を削除
+
+        // 親ノードを、子ノード群の垂直方向の中心に再配置する
+        Integer parentHeight = aNode.getExtent().y;
+        if (y > (aPoint.y + parentHeight)) {
+            Integer middleY = top + ((y - top - parentHeight) / 2);
+            aNode.setLocation(new Point(aPoint.x, middleY));
+            this.propagate(aModel);
         }
+
+        height = height > parentHeight ? height : parentHeight;
         
-        // 親ノードのY座標を、子ノード群の高さの中心にくるように計算
-        int middleOfChildren = subTreeStartPoint.y + (totalSubTreeHeight / 2);
-        int newParentY = middleOfChildren - (aNode.getExtent().y / 2);
-        aNode.setLocation(new Point(aPoint.x, newParentY));
-        this.propagate(aModel); // 親ノードの位置を更新したので再描画
-
-        // この部分木全体が占める幅と高さを計算
-        int totalWidth = aNode.getExtent().x + Constants.Interval.x + maxSubTreeWidth;
-        int totalHeight = Math.max(aNode.getExtent().y, totalSubTreeHeight);
-
-        return new Point(totalWidth, totalHeight);
+        return new Point(width, height);
     }
 
     /**
