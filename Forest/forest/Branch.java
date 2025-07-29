@@ -1,25 +1,27 @@
 package forest;
 
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.Point;
 
 /**
- * 樹状整列におけるブランチ (枝) を担うクラスになります。
+ * 樹状整列におけるブランチ (枝) を担うクラス。
  */
 public class Branch {
 
     /**
-     * ブランチ(枝)の始点となるノードを記憶するフィールドです。
+     * ブランチ(枝)の始点となるノードを記憶するフィールド。
      */
     private Node start;
 
     /**
-     * ブランチ(枝)の終点となるノードを記憶するフィールドです。
+     * ブランチ(枝)の終点となるノードを記憶するフィールド。
      */
     private Node end;
 
     /**
-     * このクラスのインスタンスを生成するコンストラクタです。
+     * このクラスのインスタンスを生成するコンストラクタ。
      * 
      * @param from ブランチ (枝) の始点となるノード
      * @param to   ブランチ (枝) の終点となるノード
@@ -31,30 +33,33 @@ public class Branch {
     }
 
     /**
-     * ブランチ(枝)を描画するメソッドです。
+     * ブランチ(枝)を描画するメソッド。
      * 
      * @param aGraphics グラフィクス (描画コンテクスト)
      */
     public void draw(Graphics aGraphics) {
         if (this.start == null || this.end == null) return;
-        
+        Graphics2D aGraphics2d = (Graphics2D)aGraphics;
+        aGraphics2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        aGraphics2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
         Point startLocation = this.start.getLocation();
         Point endLocation = this.end.getLocation();
         Point startExtent = this.start.getExtent();
         Point endExtent = this.end.getExtent();
 
         // 始点ノードの中心下部から、終点ノードの中心上部へ線を引きます。
-        int x1 = startLocation.x + startExtent.x / 2;
-        int y1 = startLocation.y + startExtent.y;
-        int x2 = endLocation.x + endExtent.x / 2;
-        int y2 = endLocation.y;
+        Integer x1 = startLocation.x + startExtent.x;
+        Integer y1 = startLocation.y + (startExtent.y / 2);
+        Integer x2 = endLocation.x;
+        Integer y2 = endLocation.y + (endExtent.y / 2);
 
         aGraphics.setColor(Constants.ForegroundColor);
         aGraphics.drawLine(x1, y1, x2, y2);
     }
 
     /**
-     * ブランチ(枝)の終点となるノードを応答するメソッドです。
+     * ブランチ(枝)の終点となるノードを応答するメソッド。
      * 
      * @return 終点ノード
      */
@@ -63,7 +68,7 @@ public class Branch {
     }
 
     /**
-     * ブランチ(枝)の始点となるノードを応答するメソッドです。
+     * ブランチ(枝)の始点となるノードを応答するメソッド。
      * 
      * @return 始点ノード
      */
@@ -72,11 +77,11 @@ public class Branch {
     }
 
     /**
-     * 自分自身を文字列に変換するメソッドです。
+     * 自分自身を文字列に変換するメソッド。
      * 
      * @return 自分自身を表す文字列
      */
-    @Override
+    //@Override
     public String toString() {
         String startName = (this.start != null) ? this.start.getName() : "null";
         String endName = (this.end != null) ? this.end.getName() : "null";
