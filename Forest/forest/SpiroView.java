@@ -12,7 +12,8 @@ public class SpiroView extends View {
 
     /**
      * このクラスのインスタンスを生成するコンストラクタです。
-     * @param aModel モデル (Modelのインスタンス) 
+     * 
+     * @param aModel モデル (Modelのインスタンス)
      */
     public SpiroView(SpiroModel aModel) {
         super(aModel, new SpiroController());
@@ -20,7 +21,8 @@ public class SpiroView extends View {
 
     /**
      * このパネル(ビュー) の描画が必要になったときに動作するメソッドです。
-     * @param aGraphics グラフィクス (描画コンテクスト) 
+     * 
+     * @param aGraphics グラフィクス (描画コンテクスト)
      */
     @Override
     public void paintComponent(Graphics aGraphics) {
@@ -29,9 +31,11 @@ public class SpiroView extends View {
         aGraphics.fillRect(0, 0, this.getWidth(), this.getHeight());
 
         SpiroModel aModel = (SpiroModel) this.model;
-        if (aModel == null) return;
+        if (aModel == null)
+            return;
         Forest forest = aModel.forest();
-        if (forest == null) return;
+        if (forest == null)
+            return;
 
         // 2. スクロール量を考慮して描画の原点をずらします。
         Graphics g2 = (Graphics) aGraphics.create();
@@ -42,7 +46,7 @@ public class SpiroView extends View {
         // 3. Forestオブジェクトに直接描画を委譲します。
         // これにより、レイアウト計算の途中経過が描画されます。
         forest.draw(g2);
-        
+
         g2.dispose(); // コピーしたGraphicsオブジェクトを破棄します。
 
         // 4. Forest全体のサイズに合わせてビューの推奨サイズを設定し、
@@ -56,16 +60,18 @@ public class SpiroView extends View {
 
     /**
      * 指定された位置 (座標) にノードが存在するかを調べるメソッドです。
-     * @param aPoint 位置 (ビュー座標) 
+     * 
+     * @param aPoint 位置 (ビュー座標)
      * @return ノード、もしも見つからなかった場合には、nullを応答します。
      */
     public Node whichOfNodes(Point aPoint) {
         SpiroModel aModel = (SpiroModel) this.model;
-        if (aModel == null || aModel.forest() == null) return null;
+        if (aModel == null || aModel.forest() == null)
+            return null;
 
         Point scroll = this.scrollAmount();
         Point modelPoint = new Point(aPoint.x + scroll.x, aPoint.y + scroll.y);
-        
+
         return aModel.forest().whichOfNodes(modelPoint);
     }
 }

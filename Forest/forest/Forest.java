@@ -38,7 +38,8 @@ public class Forest {
 
     /**
      * ブランチ(枝)を追加するメソッド。
-     * @param aBranch ブランチ (枝) 
+     * 
+     * @param aBranch ブランチ (枝)
      */
     public void addBranch(Branch aBranch) {
         this.branches.add(aBranch);
@@ -46,7 +47,8 @@ public class Forest {
 
     /**
      * ノード(節)を追加するメソッド。
-     * @param aNode ノード (節) 
+     * 
+     * @param aNode ノード (節)
      */
     public void addNode(Node aNode) {
         this.nodes.add(aNode);
@@ -61,31 +63,33 @@ public class Forest {
 
     /**
      * 樹状整列するセカンドレベル(二番階層) のメソッド。
-     * @param aModel モデル 
+     * 
+     * @param aModel モデル
      */
     public void arrange(SpiroModel aModel) {
         Integer counter = 0;
         for (Node node : this.nodes) {
             Integer height = node.getExtent().y + Constants.Margin.y + Constants.Interval.y;
             node.setStatus(Constants.UnVisited);
-            node.setLocation(new Point(0, height*counter++));
+            node.setLocation(new Point(0, height * counter++));
         }
 
-        Point aPoint = new Point(0,0);
-		ArrayList<Node> rootNodes = this.rootNodes();
-        for (Node node: rootNodes) {
+        Point aPoint = new Point(0, 0);
+        ArrayList<Node> rootNodes = this.rootNodes();
+        for (Node node : rootNodes) {
             Point secondPoint = this.arrange(node, aPoint, aModel);
-			aPoint = new Point(0, secondPoint.y + Constants.Interval.y);
+            aPoint = new Point(0, secondPoint.y + Constants.Interval.y);
         }
         this.flushBounds();
     }
 
     /**
      * 樹状整列する再帰レベル (N番階層) のメソッド。
-     * @param aNode ノード 
-     * @param aPoint ノードの位置(座標) 
-     * @param aModel モデル (nullのときはアニメーションを行わない) 
-     * @return 樹状整列に必要だった大きさ(幅と高さ) 
+     * 
+     * @param aNode  ノード
+     * @param aPoint ノードの位置(座標)
+     * @param aModel モデル (nullのときはアニメーションを行わない)
+     * @return 樹状整列に必要だった大きさ(幅と高さ)
      */
     protected Point arrange(Node aNode, Point aPoint, SpiroModel aModel) {
         aNode.setStatus(Constants.Visited);
@@ -94,7 +98,7 @@ public class Forest {
 
         Point extent = aNode.getExtent();
         ArrayList<Node> subNodes = this.sortNodes(this.subNodes(aNode));
-        
+
         // 子ノードがいない場合（ベースケース）
         if (subNodes.isEmpty()) {
             Integer width = aPoint.x + extent.x;
@@ -117,7 +121,7 @@ public class Forest {
                 // y座標は、これまで配置したサブツリーの中で最も低い位置を記録する
                 Integer currentBottom = y + subNode.getExtent().y;
                 y = subTreeBounds.y > currentBottom ? subTreeBounds.y : currentBottom;
-                
+
                 // 全体の幅と高さを更新
                 width = subTreeBounds.x > width ? subTreeBounds.x : width;
                 height = subTreeBounds.y > height ? subTreeBounds.y : height;
@@ -138,13 +142,14 @@ public class Forest {
         }
 
         height = height > parentHeight ? height : parentHeight;
-        
+
         return new Point(width, height);
     }
 
     /**
      * フォレスト(木・林・森・亜格子状の森) の領域 (矩形)を応答するメソッド。
-     * @return フォレスト領域 (矩形) 
+     * 
+     * @return フォレスト領域 (矩形)
      */
     public Rectangle bounds() {
         this.bounds = new Rectangle();
@@ -154,7 +159,8 @@ public class Forest {
 
     /**
      * フォレスト(木・林・森・亜格子状の森)を描画するメソッド。
-     * @param aGraphics グラフィクス (描画コンテクスト) 
+     * 
+     * @param aGraphics グラフィクス (描画コンテクスト)
      */
     public void draw(Graphics aGraphics) {
         for (Branch branch : this.branches) {
@@ -174,7 +180,8 @@ public class Forest {
 
     /**
      * チックタックの間、スリープし、モデルが変化した、と騒ぐ(広める: 放送する) メソッド。
-     * @param aModel モデル 
+     * 
+     * @param aModel モデル
      */
     protected void propagate(SpiroModel aModel) {
         try {
@@ -189,7 +196,8 @@ public class Forest {
 
     /**
      * フォレストの根元 (ルート)となるノード群を応答するメソッド。
-     * @return ルートノード群 
+     * 
+     * @return ルートノード群
      */
     public ArrayList<Node> rootNodes() {
         ArrayList<Node> roots = new ArrayList<>();
@@ -203,8 +211,9 @@ public class Forest {
 
     /**
      * 引数で指定されたノード群をノード名でソート (並び替えを)するメソッド。
-     * @param nodeCollection ノード群 
-     * @return ソートされたノード群 
+     * 
+     * @param nodeCollection ノード群
+     * @return ソートされたノード群
      */
     protected ArrayList<Node> sortNodes(ArrayList<Node> nodeCollection) {
         Collections.sort(nodeCollection, Comparator.comparing(Node::getName));
@@ -213,8 +222,9 @@ public class Forest {
 
     /**
      * 引数で指定されたノードのサブノード群を応答するメソッド。
-     * @param aNode ノード 
-     * @return サブノード群 
+     * 
+     * @param aNode ノード
+     * @return サブノード群
      */
     public ArrayList<Node> subNodes(Node aNode) {
         ArrayList<Node> subs = new ArrayList<>();
@@ -228,8 +238,9 @@ public class Forest {
 
     /**
      * 引数で指定されたノードのスーパーノード群を応答するメソッド。
-     * @param aNode ノード 
-     * @return スーパーノード群 
+     * 
+     * @param aNode ノード
+     * @return スーパーノード群
      */
     public ArrayList<Node> superNodes(Node aNode) {
         ArrayList<Node> supers = new ArrayList<>();
@@ -243,7 +254,8 @@ public class Forest {
 
     /**
      * 自分自身を文字列に変換するメソッドです。
-     * @return 自分自身を表す文字列 
+     * 
+     * @return 自分自身を表す文字列
      */
     @Override
     public String toString() {
@@ -252,7 +264,8 @@ public class Forest {
 
     /**
      * 指定された位置(座標)にノードが存在するかを調べるメソッドです。
-     * @param aPoint 位置 (モデル座標) 
+     * 
+     * @param aPoint 位置 (モデル座標)
      * @return ノード、もしも見つからなかった場合には、nullを応答します。
      */
     public Node whichOfNodes(Point aPoint) {

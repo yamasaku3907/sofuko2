@@ -18,7 +18,8 @@ public class SpiroController extends Controller {
 
     /**
      * マウスのボタンをクリックしたときに動作するメソッドです。
-     * @param aMouseEvent マウスイベント 
+     * 
+     * @param aMouseEvent マウスイベント
      */
     @Override
     public void mouseClicked(MouseEvent aMouseEvent) {

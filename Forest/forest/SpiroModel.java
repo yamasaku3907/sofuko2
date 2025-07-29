@@ -23,7 +23,8 @@ public class SpiroModel extends Model {
 
     /**
      * このクラスのインスタンスを生成するコンストラクタです。
-     * @param aFile 樹状整列データファイル 
+     * 
+     * @param aFile 樹状整列データファイル
      */
     public SpiroModel(File aFile) {
         super();
@@ -37,16 +38,18 @@ public class SpiroModel extends Model {
      * アニメーションを行うメソッドです。
      */
     public void animate() {
-        if (this.forest == null) return;
+        if (this.forest == null)
+            return;
         this.forest.arrange(this);
-		this.changed();
+        this.changed();
     }
 
     /**
      * 樹状整列を行うメソッドです。
      */
     public void arrange() {
-        if (this.forest == null) return;
+        if (this.forest == null)
+            return;
         this.forest.arrange();
         this.changed();
     }
@@ -63,7 +66,8 @@ public class SpiroModel extends Model {
 
     /**
      * 樹状整列それ自身を応答するメソッドです。
-     * @return 樹状整列それ自身 
+     * 
+     * @return 樹状整列それ自身
      */
     public Forest forest() {
         return this.forest;
@@ -71,7 +75,8 @@ public class SpiroModel extends Model {
 
     /**
      * 樹状整列データファイルから樹状整列それ自身を生成するメソッドです。
-     * @param aFile 樹状整列データファイル 
+     * 
+     * @param aFile 樹状整列データファイル
      */
     protected void read(File aFile) {
         this.forest = new Forest();
@@ -95,7 +100,8 @@ public class SpiroModel extends Model {
                 }
 
                 String[] parts = line.split(",", 2);
-                if (parts.length < 2) continue;
+                if (parts.length < 2)
+                    continue;
 
                 if (currentSection.equals(Constants.TagOfNodes)) {
                     String id = parts[0].trim();
@@ -119,20 +125,24 @@ public class SpiroModel extends Model {
 
     /**
      * 樹状整列の根元 (ルート) になるノードを探し出して応答するメソッドです。
-     * @return ルートノード、ただし、見つからないときはnull 
+     * 
+     * @return ルートノード、ただし、見つからないときはnull
      */
     public Node root() {
-        if (this.forest == null) return null;
+        if (this.forest == null)
+            return null;
         ArrayList<Node> roots = this.forest.rootNodes();
         return roots.isEmpty() ? null : roots.get(0);
     }
 
     /**
      * 樹状整列の根元(ルート)になるノードたちを探し出して応答するメソッドです。
-     * @return ルートノードたち、ただし、見つからないときは空リスト 
+     * 
+     * @return ルートノードたち、ただし、見つからないときは空リスト
      */
     public ArrayList<Node> roots() {
-        if (this.forest == null) return new ArrayList<Node>();
+        if (this.forest == null)
+            return new ArrayList<Node>();
         return this.forest.rootNodes();
     }
 }

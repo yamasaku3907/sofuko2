@@ -38,8 +38,9 @@ public class Branch {
      * @param aGraphics グラフィクス (描画コンテクスト)
      */
     public void draw(Graphics aGraphics) {
-        if (this.start == null || this.end == null) return;
-        Graphics2D aGraphics2d = (Graphics2D)aGraphics;
+        if (this.start == null || this.end == null)
+            return;
+        Graphics2D aGraphics2d = (Graphics2D) aGraphics;
         aGraphics2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         aGraphics2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
@@ -81,7 +82,7 @@ public class Branch {
      * 
      * @return 自分自身を表す文字列
      */
-    //@Override
+    // @Override
     public String toString() {
         String startName = (this.start != null) ? this.start.getName() : "null";
         String endName = (this.end != null) ? this.end.getName() : "null";
