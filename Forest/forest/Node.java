@@ -2,37 +2,39 @@ package forest;
 
 import java.awt.Component;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.FontMetrics;
 
 /**
- * 樹状整列におけるノード (節)を担うクラスになります。
+ * 樹状整列におけるノード (節)を担うクラス。
  */
 public class Node extends Component {
 
     /**
-     * ノード名:ラベル文字列を記憶するフィールドです。
+     * ノード名:ラベル文字列を記憶するフィールド。
      */
     private String name;
 
     /**
-     * ノードの場所(位置: 座標)を記憶するフィールドです。
+     * ノードの場所(位置: 座標)を記憶するフィールド。
      */
     private Point location;
 
     /**
-     * ノードの大きさ(幅と高さ)を記憶するフィールドです。
+     * ノードの大きさ(幅と高さ)を記憶するフィールド。
      */
     private Point extent;
 
     /**
-     * 樹状整列する際のノードの状態を記憶するフィールドです。
+     * 樹状整列する際のノードの状態を記憶するフィールド。
      */
     private Integer status;
 
     /**
-     * このクラスのインスタンスを生成するコンストラクタです。
+     * このクラスのインスタンスを生成するコンストラクタ。
      * @param aString ノード名: ラベル文字列 
      */
     public Node(String aString) {
@@ -42,31 +44,33 @@ public class Node extends Component {
         this.status = Constants.UnKnown;
         // フォント情報を基にノードの大きさを計算
         this.setFont(Constants.DefaultFont);
-        int width = this.stringWidth(aString) + Constants.Margin.x * 2;
-        int height = this.stringHeight(aString) + Constants.Margin.y * 2;
+        Integer width = this.stringWidth(this.name) + (Constants.Margin.x * 2);
+        Integer height = this.stringHeight(this.name) + (Constants.Margin.y * 2);
         this.extent = new Point(width, height);
     }
 
     /**
-     * ノード(節)を描画するメソッドです。
+     * ノード(節)を描画するメソッド。
      * @param aGraphics グラフィクス (描画コンテクスト) 
      */
     public void draw(Graphics aGraphics) {
+        Graphics2D aGraphics2D = (Graphics2D)aGraphics;
+		aGraphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		aGraphics2D.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
          // ノードの矩形を描画
-        aGraphics.setColor(Constants.BackgroundColor);
-        aGraphics.fillRect(this.location.x, this.location.y, this.extent.x, this.extent.y);
-        aGraphics.setColor(Constants.ForegroundColor);
-        aGraphics.drawRect(this.location.x, this.location.y, this.extent.x, this.extent.y);
-
+        aGraphics2D.setColor(Constants.ForegroundColor);
+        aGraphics2D.drawRect(this.location.x, this.location.y, this.extent.x, this.extent.y);
         // ノード名を描画
-        FontMetrics metrics = aGraphics.getFontMetrics();
-        int strX = this.location.x + Constants.Margin.x;
-        int strY = this.location.y + metrics.getAscent() + Constants.Margin.y;
-        aGraphics.drawString(this.name, strX, strY);
+        String aString = this.getName();
+		Point aPoint = (this.getBounds()).getLocation();
+		aPoint.translate(Constants.Margin.x, this.extent.y - Constants.Margin.y - 2);
+		// ノード（節）の名前（ラベル）描き出す。
+		aGraphics2D.setFont(Constants.DefaultFont);
+		aGraphics2D.drawString(aString, aPoint.x, aPoint.y);
     }
 
     /**
-     * ノード(節)の描画領域を応答するメソッドです。
+     * ノード(節)の描画領域を応答するメソッド。
      * @return ノード(節)の描画領域 (Rectangleのインスタンス) 
      */
     @Override
@@ -75,7 +79,7 @@ public class Node extends Component {
     }
 
     /**
-     * ノード(節)の大きさを応答するメソッドです。
+     * ノード(節)の大きさを応答するメソッド。
      * @return ノード(節)の大きさ (幅と高さ) 
      */
     public Point getExtent() {
@@ -83,7 +87,7 @@ public class Node extends Component {
     }
 
     /**
-     * ノード(節)の位置を応答するメソッドです。
+     * ノード(節)の位置を応答するメソッド。
      * @return ノード(節)の位置(座標) 
      */
     @Override
@@ -92,7 +96,7 @@ public class Node extends Component {
     }
 
     /**
-     * ノード(節)の名前を応答するメソッドです。
+     * ノード(節)の名前を応答するメソッド。
      * @return ノード名(ラベル文字列) 
      */
     @Override
@@ -101,7 +105,7 @@ public class Node extends Component {
     }
 
     /**
-     * ノード(節)の状態を応答するメソッドです。
+     * ノード(節)の状態を応答するメソッド。
      * @return ノードの状態 
      */
     public Integer getStatus() {
@@ -109,7 +113,7 @@ public class Node extends Component {
     }
 
     /**
-     * ノード(節)の大きさを設定するメソッドです。
+     * ノード(節)の大きさを設定するメソッド。
      * @param aPoint ノードの大きさ(幅と高さ) 
      */
     public void setExtent(Point aPoint) {
@@ -117,7 +121,7 @@ public class Node extends Component {
     }
 
     /**
-     * ノード(節)の位置を設定するメソッドです。
+     * ノード(節)の位置を設定するメソッド。
      * @param aPoint ノードの位置(座標) 
      */
     @Override
@@ -126,7 +130,7 @@ public class Node extends Component {
     }
 
     /**
-     * ノード(節)の名前を設定するメソッドです。
+     * ノード(節)の名前を設定するメソッド。
      * @param aString ノードの名前(ラベル) 
      */
     @Override
@@ -135,7 +139,7 @@ public class Node extends Component {
     }
 
     /**
-     * ノード(節)の状態を設定するメソッドです。
+     * ノード(節)の状態を設定するメソッド。
      * @param anInteger ノードの状態 
      */
     public void setStatus(Integer anInteger) {
@@ -143,7 +147,7 @@ public class Node extends Component {
     }
 
     /**
-     * 文字列の高さを応答するメソッドです。
+     * 文字列の高さを応答するメソッド。
      * @param string 文字列 
      * @return 文字列の高さ 
      */
@@ -153,7 +157,7 @@ public class Node extends Component {
     }
 
     /**
-     * 文字列の幅を応答するメソッドです。
+     * 文字列の幅を応答するメソッド。
      * @param string 文字列 
      * @return 文字列の幅 
      */
@@ -163,10 +167,10 @@ public class Node extends Component {
     }
 
     /**
-     * 自分自身を文字列に変換するメソッドです。
+     * 自分自身を文字列に変換するメソッド。
      * @return 自分自身を表す文字列 
      */
-    @Override
+    //@Override
     public String toString() {
         return "[Node=" + this.name + "]";
     }
