@@ -251,6 +251,7 @@ th {
 <div class="belt">
 <h3><a name="KanseiSaseteKudasai">プログラム一覧</a></h3>
 </div>
+<h4>アプリケーションプログラム</h4>
 <ul>
   <li><a href="#Constants">Constants</a>（定数）
   <li><a href="#Example">Example</a>（メインクラス）
@@ -261,6 +262,15 @@ th {
   <li><a href="#Branch">Branch</a>（ブランチ）
   <li><a href="#Node">Node</a>（ノード）
 </ul>
+<h4>テストプログラム</h4>
+<ul>
+  <li><a href="#SpiroModelTest">SpiroModelTest</a>（モデルテスト）
+  <li><a href="#SpiroView">SpiroView</a>（ビューテスト）
+  <li><a href="#ForestTest">ForestTest</a>（フォレストテスト）
+  <li><a href="#BranchTest">BranchTest</a>（ブランチテスト）
+  <li><a href="#NodeTest">NodeTest</a>（ノードテスト）
+</ul>
+<h4>ビルド関連ファイル</h4>
 <ul>
   <li><a href="#forest.mf">forest.mf</a>（マニフェストファイル）
   <li><a href="#Makefile">Makefile</a>（メイクファイル）
@@ -1507,6 +1517,448 @@ junit:
 
 &lt;/project&gt;
 </code></pre>
+<div class="belt">
+  <h3><a name="SpiroModelTest">SpiroModelTest (モデルテスト)</a></h3>
+</div>
+<pre>
+package forest;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.io.File;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+
+import org.junit.Before;
+import org.junit.Test;
+
+/**
+ * SpiroModelクラスをテストするためのクラス。
+ */
+public class SpiroModelTest {
+
+    private File testFile;
+    private SpiroModel testModel;
+
+    /**
+     * 各テストの前に、テスト用の小さなファイルを作成し、
+     * それを元にSpiroModelインスタンスを生成します。
+     */
+    @Before
+    public void setUp() throws Exception {
+        // テスト用の小さな木構造データを持つ一時ファイルを作成
+        testFile = File.createTempFile("test-model", ".txt");
+        testFile.deleteOnExit();
+
+        try (PrintWriter out = new PrintWriter(testFile, "UTF-8")) {
+            out.println("nodes:");
+            out.println("10, RootNode");
+            out.println("20, ChildNode1");
+            out.println("30, ChildNode2");
+            out.println("branches:");
+            out.println("10, 20");
+            out.println("10, 30");
+        }
+        
+        // テスト対象のモデルを生成
+        testModel = new SpiroModel(testFile);
+    }
+
+    /**
+     * コンストラクタ（と内部で呼ばれるreadメソッド）が正しくForestを構築するかをテストします。
+     */
+    @Test
+    public void testModelInitializationAndRead() {
+        System.out.println("Testing SpiroModel initialization...");
+        
+        // 1. Modelと、それが保持するForestがnullでないことを確認
+        assertNotNull("Model should not be null", testModel);
+        assertNotNull("Forest within the model should not be null", testModel.forest());
+        
+        // 2. Forest内のノード数とブランチ数が正しいかを確認
+        assertEquals("Forest should have 3 nodes and 2 branches",
+                     "[Forest=3 nodes, 2 branches]",
+                     testModel.forest().toString());
+    }
+
+    /**
+     * rootsメソッドが正しくルートノードを返すかをテストします。
+     */
+    @Test
+    public void testRootsMethod() {
+        System.out.println("Testing roots() method...");
+        
+        ArrayList<Node> roots = testModel.roots();
+        assertNotNull("Roots list should not be null", roots);
+        assertEquals("There should be exactly 1 root node", 1, roots.size());
+        assertEquals("The root node's name should be 'RootNode'", "RootNode", roots.get(0).getName());
+    }
+}
+</pre>
+<div class="belt">
+  <h3><a name="SpiroViewTest">SpiroViewTest (ビューテスト)</a></h3>
+</div>
+<pre>
+package forest;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull; 
+import static org.junit.Assert.assertSame;
+
+import java.awt.Graphics;
+import java.awt.Point;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.PrintWriter;
+import mvc.Controller;
+import mvc.Model;
+
+import org.junit.Before;
+import org.junit.Test;
+
+/**
+ * SpiroViewクラスをテストするためのクラス。
+ */
+public class SpiroViewTest {
+
+    private SpiroModel testModel;
+    private SpiroView testView;
+    private File testFile;
+    private Node rootNode;
+
+    @Before
+    public void setUp() throws Exception {
+        testFile = File.createTempFile("test-view", ".txt");
+        testFile.deleteOnExit();
+
+        try (PrintWriter out = new PrintWriter(testFile, "UTF-8")) {
+            out.println("nodes:");
+            out.println("1, Root");
+            out.println("branches:");
+        }
+        
+        testModel = new SpiroModel(testFile);
+        rootNode = testModel.root();
+        
+        // ★ SpiroViewのコンストラクタに合わせて修正
+        testView = new SpiroView(testModel); 
+    }
+
+    /**
+     * コンストラクタが正しくModelとControllerを初期化するかをテストします。
+     */
+    @Test
+    public void testInitialization() {
+        System.out.println("Testing SpiroView initialization...");
+        
+        // ★ これでSpiroViewに追加したメソッドを呼び出せるようになります
+        assertNotNull("View should have a model", testView.getModel());
+        assertSame("View's model should be the one we passed", testModel, testView.getModel());
+        assertNotNull("View should have a controller", testView.getController());
+    }
+
+    /**
+     * whichOfNodesメソッドが正しく動作するかをテストします。
+     */
+    @Test
+    public void testWhichOfNodes() {
+        System.out.println("Testing whichOfNodes()...");
+        
+        Point nodeLocation = rootNode.getLocation();
+        Point nodeExtent = rootNode.getExtent();
+        Point pointInsideNode = new Point(nodeLocation.x + nodeExtent.x / 2, nodeLocation.y + nodeExtent.y / 2);
+        
+        Node foundNode = testView.whichOfNodes(pointInsideNode);
+        assertSame("Should find the node at the correct location", rootNode, foundNode);
+        
+        Node notFoundNode = testView.whichOfNodes(new Point(999, 999));
+        assertNull("Should return null for a point with no node", notFoundNode);
+    }
+    
+    /**
+     * paintComponentメソッドが例外を発生させずに実行できるかをテストします。
+     */
+    @Test
+    public void testPaintComponentDoesNotCrash() {
+        System.out.println("Testing paintComponent() does not crash...");
+        try {
+            BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB);
+            Graphics g = image.getGraphics();
+            testView.paintComponent(g);
+            g.dispose();
+        } catch (Exception e) {
+            org.junit.Assert.fail("paintComponent threw an exception: " + e.getMessage());
+        }
+    }
+}
+
+</pre>
+<div class="belt">
+  <h3><a name="ForestTest">ForestTest (フォレストテスト)</a></h3>
+</div>
+<pre>
+package forest;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import org.junit.Before;
+import org.junit.Test;
+
+/**
+ * Forestクラスをテストするためのクラス。
+ */
+public class ForestTest {
+
+    private Forest testForest;
+    private Node rootNode;
+    private Node childNode1;
+    private Node childNode2;
+    private Node grandchildNode;
+
+    /**
+     * 各テストの前に、テスト用のForestインスタンスと階層的なノード群を生成します。
+     * * <pre>
+     * Root
+     * |- Child1
+     * |   `- Grandchild
+     * `- Child2
+     * </pre>
+     */
+    @Before
+    public void setUp() {
+        testForest = new Forest();
+
+        // ノードを生成
+        rootNode = new Node("Root");
+        childNode1 = new Node("Child1");
+        childNode2 = new Node("Child2");
+        grandchildNode = new Node("Grandchild");
+
+        // ノードをForestに追加
+        testForest.addNode(rootNode);
+        testForest.addNode(childNode1);
+        testForest.addNode(childNode2);
+        testForest.addNode(grandchildNode);
+
+        // ブランチをForestに追加
+        testForest.addBranch(new Branch(rootNode, childNode1));
+        testForest.addBranch(new Branch(rootNode, childNode2));
+        testForest.addBranch(new Branch(childNode1, grandchildNode));
+    }
+
+    /**
+     * ノードとブランチが正しく追加されるかをテストします。
+     * Forestクラスに getNodes() と getBranches() メソッドを追加する必要があります。
+     */
+    @Test
+    public void testAddNodeAndBranch() {
+        System.out.println("Testing addNode and addBranch...");
+        // assertEquals(4, testForest.getNodes().size());
+        // assertEquals(3, testForest.getBranches().size());
+        // Javadocにgetterがないため、toString()で簡易的に確認
+        assertEquals("[Forest=4 nodes, 3 branches]", testForest.toString());
+    }
+
+    /**
+     * subNodesメソッドが、指定したノードの子ノード群を正しく返すかをテストします。
+     */
+    @Test
+    public void testSubNodes() {
+        System.out.println("Testing subNodes...");
+        ArrayList<Node> rootSubs = testForest.subNodes(rootNode);
+        assertEquals("Root should have 2 sub-nodes", 2, rootSubs.size());
+        assertTrue("Sub-nodes of Root should include Child1", rootSubs.contains(childNode1));
+        assertTrue("Sub-nodes of Root should include Child2", rootSubs.contains(childNode2));
+
+        ArrayList<Node> child1Subs = testForest.subNodes(childNode1);
+        assertEquals("Child1 should have 1 sub-node", 1, child1Subs.size());
+        assertTrue("Sub-node of Child1 should be Grandchild", child1Subs.contains(grandchildNode));
+
+        ArrayList<Node> leafSubs = testForest.subNodes(childNode2);
+        assertEquals("Child2 should have 0 sub-nodes", 0, leafSubs.size());
+    }
+
+    /**
+     * superNodesメソッドが、指定したノードの親ノード群を正しく返すかをテストします。
+     */
+    @Test
+    public void testSuperNodes() {
+        System.out.println("Testing superNodes...");
+        ArrayList<Node> grandchildSupers = testForest.superNodes(grandchildNode);
+        assertEquals("Grandchild should have 1 super-node", 1, grandchildSupers.size());
+        assertTrue("Super-node of Grandchild should be Child1", grandchildSupers.contains(childNode1));
+
+        ArrayList<Node> child1Supers = testForest.superNodes(childNode1);
+        assertEquals("Child1 should have 1 super-node", 1, child1Supers.size());
+        assertTrue("Super-node of Child1 should be Root", child1Supers.contains(rootNode));
+
+        ArrayList<Node> rootSupers = testForest.superNodes(rootNode);
+        assertEquals("Root should have 0 super-nodes", 0, rootSupers.size());
+    }
+
+    /**
+     * rootNodesメソッドが、森全体のルートノードを正しく見つけ出すかをテストします。
+     */
+    @Test
+    public void testRootNodes() {
+        System.out.println("Testing rootNodes...");
+        ArrayList<Node> roots = testForest.rootNodes();
+        assertNotNull("Root nodes list should not be null", roots);
+        assertEquals("There should be 1 root node", 1, roots.size());
+        assertTrue("The root node should be 'Root'", roots.contains(rootNode));
+    }
+}
+</pre>
+<div class="belt">
+  <h3><a name="BranchTest">BranchTest (ブランチテスト)</a></h3>
+</div>
+<pre>
+package forest;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+
+import org.junit.Before;
+import org.junit.Test;
+
+/**
+ * Branchクラスをテストするためのクラス。
+ */
+public class BranchTest {
+
+    private Node startNode;
+    private Node endNode;
+    private Branch testBranch;
+
+    /**
+     * 各テストメソッドが実行される前に、テスト用のNodeとBranchインスタンスを生成します。
+     */
+    @Before
+    public void setUp() {
+        startNode = new Node("StartNode");
+        endNode = new Node("EndNode");
+        testBranch = new Branch(startNode, endNode);
+    }
+
+    /**
+     * コンストラクタが正しくフィールドを初期化し、
+     * start()およびend()メソッドが正しいNodeを返すかをテストします。
+     */
+    @Test
+    public void testConstructorAndGetters() {
+        System.out.println("Testing Branch constructor and getters...");
+
+        // 1. nullでないことを確認
+        assertNotNull("Branch should not be null", testBranch);
+
+        // 2. start()メソッドが正しい始点ノードを返すか
+        // assertEqualsよりも厳密なassertSameを使い、全く同じインスタンスかを比較します。
+        assertSame("start() should return the correct start node instance", startNode, testBranch.start());
+
+        // 3. end()メソッドが正しい終点ノードを返すか
+        assertSame("end() should return the correct end node instance", endNode, testBranch.end());
+    }
+
+    /**
+     * toStringメソッドが期待されるフォーマットの文字列を生成するかをテストします。
+     */
+    @Test
+    public void testToString() {
+        System.out.println("Testing Branch toString()...");
+
+        String expectedString = "[Branch=StartNode -> EndNode]";
+        assertEquals("toString() should produce the correct format", expectedString, testBranch.toString());
+    }
+}
+
+</pre>
+<div class="belt">
+  <h3><a name="NodeTest">NodeTest (ノードテスト)</a></h3>
+</div>
+<pre>
+package forest;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.awt.Point;
+
+import org.junit.Before;
+import org.junit.Test;
+
+/**
+ * Nodeクラスをテストするためのクラス。
+ */
+public class NodeTest {
+
+    private Node testNode;
+    private final String nodeName = "TestNode";
+
+    /**
+     * 各テストメソッドが実行される前に、新しいNodeインスタンスを生成します。
+     */
+    @Before
+    public void setUp() {
+        testNode = new Node(nodeName);
+    }
+
+    /**
+     * コンストラクタが正しくフィールドを初期化するかをテストします。
+     */
+    @Test
+    public void testConstructor() {
+        System.out.println("Testing Node constructor...");
+        
+        // 1. nullでないことを確認
+        assertNotNull("Node should not be null", testNode);
+        
+        // 2. 名前が正しく設定されているか
+        assertEquals("Name should be set correctly", nodeName, testNode.getName());
+        
+        // 3. locationが(0,0)で初期化されているか
+        assertEquals("Initial location should be (0,0)", new Point(0, 0), testNode.getLocation());
+        
+        // 4. statusがUnKnownで初期化されているか
+        assertEquals("Initial status should be UnKnown", Constants.UnKnown, testNode.getStatus());
+        
+        // 5. extent（大きさ）が名前を元に計算されているか（0より大きいことを確認）
+        assertTrue("Extent width should be greater than 0", testNode.getExtent().x > 0);
+        assertTrue("Extent height should be greater than 0", testNode.getExtent().y > 0);
+    }
+
+    /**
+     * setLocationメソッドとgetLocationメソッドが正しく動作するかをテストします。
+     */
+    @Test
+    public void testSetAndGetLocation() {
+        System.out.println("Testing set/get Location...");
+        
+        Point newLocation = new Point(100, 200);
+        testNode.setLocation(newLocation);
+        
+        assertEquals("Location should be updated", newLocation, testNode.getLocation());
+    }
+
+    /**
+     * setStatusメソッドとgetStatusメソッドが正しく動作するかをテストします。
+     */
+    @Test
+    public void testSetAndGetStatus() {
+        System.out.println("Testing set/get Status...");
+
+        Integer newStatus = Constants.Visited;
+        testNode.setStatus(newStatus);
+
+        assertEquals("Status should be updated", newStatus, testNode.getStatus());
+    }
+}
+</pre>
 <hr>
 <div class="right-small">Copyright 2025 Project: software engineering II, Updated: 2025/07/30 (Created: 2025/07/27)</div>
 </body>
