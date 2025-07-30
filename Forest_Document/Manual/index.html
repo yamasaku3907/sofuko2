@@ -322,28 +322,14 @@
       <p>Design:
         基本設計.asta 基本設計.png 詳細設計.asta 詳細設計.png</p>
       <p>Forest:
-        build.xml Classes Classes_Test forest </p>
-      <p>Forest_Document</p>
-      <p>README.md</p>
+        build.xml Classes Classes_Test forest forest.jar</p>
+        <p>forest.mf lib Makefile mvc.jar resource Test</p>
+      <p>Forest_Document: BasicDesign DevelopmentResult Requirement index.html </p>
+        <p>DetailDesign Manual TestResult DevelopmentPlan Program TestSpecification</p>
+      
     </div>
-    <p>6.Forestフォルダに移動する。ここでもう一度中身の確認を行う。</p>
-    <div class="belt-blue left-tab">
-      <p>$ cd Forest</p>
-      <p>$ ls -l</p>
-      <p>total 80</p>
-      <p>-rw-rw-r--@ 1 mitsukitomoya staff 5312 7 30 18:30 build.xml</p>
-      <p>drwxrwxr-x@ 3 mitsukitomoya staff 96 7 30 18:37 Classes</p>
-      <p>drwxrwxr-x@ 3 mitsukitomoya staff 96 7 30 18:37 Classes_Test</p>
-      <p>drwxrwxr-x@ 11 mitsukitomoya staff 352 7 30 18:37 forest</p>
-      <p>-rw-rw-r--@ 1 mitsukitomoya staff 16083 7 30 18:30 forest.jar</p>
-      <p>-rw-rw-r--@ 1 mitsukitomoya staff 49 7 30 18:30 forest.mf</p>
-      <p>drwxrwxr-x@ 4 mitsukitomoya staff 128 7 30 18:37 lib</p>
-      <p>-rw-rw-r--@ 1 mitsukitomoya staff 293 7 30 18:30 Makefile</p>
-      <p>-rw-rw-r--@ 1 mitsukitomoya staff 5249 7 30 18:30 mvc.jar</p>
-      <p>drwxrwxr-x@ 5 mitsukitomoya staff 160 7 30 18:37 resource</p>
-      <p>drwxrwxr-x@ 4 mitsukitomoya staff 128 7 30 18:37 Test</p>
-    </div>
-    <p>7.makeする。</p>
+    
+    <p>6.Forestフォルダに移動し、makeする。</p>
     <div class="belt-blue left-tab">
       <p>$ make</p>
       <p>env LC_ALL=ja_JP.UTF-8 ant all</p>
