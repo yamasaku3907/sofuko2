@@ -4,6 +4,8 @@ import java.awt.Graphics;
 import java.awt.Dimension;
 import java.awt.Point;
 import mvc.View;
+import mvc.Model;
+import mvc.Controller;
 
 /**
  * 樹状整列におけるMVCのビュー (V) を担うクラスになります。
@@ -73,5 +75,27 @@ public class SpiroView extends View {
         Point modelPoint = new Point(aPoint.x + scroll.x, aPoint.y + scroll.y);
 
         return aModel.forest().whichOfNodes(modelPoint);
+    }
+
+    /**
+     * このビューが保持しているモデルを応答します。
+     * テストクラスからprotectedなフィールド(model)にアクセスするために用意されています。
+     * 
+     * @return このビューに紐付いたモデル
+     */
+    public Model getModel() {
+        return this.model;
+    }
+
+    /**
+     * 
+     * このビューが保持しているコントローラを応答します。
+     * 
+     * テストクラスからprotectedなフィールド(controller)にアクセスするために用意されています。
+     * 
+     * @return このビューに紐付いたコントローラ
+     */
+    public Controller getController() {
+        return this.controller;
     }
 }
