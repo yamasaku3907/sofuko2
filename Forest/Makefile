@@ -27,6 +27,5 @@ doc:
 zip:
 	$(ANT) zip
 
-# JUnit Test Target
 junit:
 	$(ANT) junit
