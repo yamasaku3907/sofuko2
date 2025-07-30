@@ -629,6 +629,28 @@ public class SpiroView extends View {
     }
 
     /**
+     * このビューが保持しているモデルを応答します。
+     * テストクラスからprotectedなフィールド(model)にアクセスするために用意されています。
+     * 
+     * @return このビューに紐付いたモデル
+     */
+    public Model getModel() {
+        return this.model;
+    }
+
+    /**
+     * 
+     * このビューが保持しているコントローラを応答します。
+     * 
+     * テストクラスからprotectedなフィールド(controller)にアクセスするために用意されています。
+     * 
+     * @return このビューに紐付いたコントローラ
+     */
+    public Controller getController() {
+        return this.controller;
+    }
+
+    /**
      * 指定された位置 (座標) にノードが存在するかを調べるメソッドです。
      * 
      * @param aPoint 位置 (ビュー座標)
@@ -1283,12 +1305,208 @@ Main-Class: forest.Example
   <h3><a name="Makefile">Makefile (メイクファイル)</a></h3>
 </div>
 <pre>
-</pre>
+  ANT	= env LC_ALL=ja_JP.UTF-8 ant
+
+all:
+	$(ANT) all
+
+clean:
+	$(ANT) clean
+
+test:
+	$(ANT) test
+
+tree: clean
+	$(ANT) tree
+
+forest: clean
+	$(ANT) forest
+
+semilattice: clean
+	$(ANT) semilattice
+
+install:
+	$(ANT) install
+
+doc:
+	$(ANT) doc
+
+zip:
+	$(ANT) zip
+
+junit:
+	$(ANT) junit
+  </pre>
 <div class="belt">
   <h3><a name="build.xml">build.xml (ビルドファイル)</a></h3>
 </div>
-<pre>
-</pre>
+<pre><code class="language-text">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+&lt;project name="Forest" default="all" basedir="."&gt;
+
+    &lt;property name="package" value="forest" /&gt;
+    &lt;property name="mvc" value="mvc" /&gt;
+    &lt;property name="packagenames" value="${package},${mvc}" /&gt;
+    &lt;property name="destdir" value="./Classes" /&gt;
+    &lt;property name="docdir" value="./JavaDoc" /&gt;
+    &lt;property name="instdir" value="./${ant.project.name}.app/Contents/Resources/Java" /&gt;
+    &lt;property name="copyright" value="Copyright 2008-2017 AOKI Atsushi. All Rights Reserved." /&gt;
+    &lt;property name="zipname" value="${ant.project.name}" /&gt;
+
+    &lt;target name="all" depends="jar" description="build all"&gt;
+        &lt;exec executable="date" spawn="false" /&gt;
+    &lt;/target&gt;
+
+    &lt;target name="prepare" depends="" description="prepare to compile"&gt;
+        &lt;mkdir dir="${destdir}" /&gt;
+        &lt;exec executable="date" spawn="false" /&gt;
+    &lt;/target&gt;
+
+    &lt;target name="compile" depends="prepare" description="compile all sources"&gt;
+        &lt;javac
+            fork="true"
+            srcdir="${basedir}"
+            destdir="${destdir}"
+            includeAntRuntime="true"
+            encoding="UTF-8"
+            deprecation="on"
+            verbose="false"&gt;
+            &lt;compilerarg value="-J-Dfile.encoding=UTF8" /&gt;
+            &lt;compilerarg value="-Xlint:all" /&gt;
+            &lt;classpath&gt;
+                &lt;pathelement location="." /&gt;
+                &lt;pathelement location="${mvc}.jar" /&gt;
+            &lt;/classpath&gt;
+            &lt;exclude name="Test/&zwj;**"/&gt;
+        &lt;/javac&gt;
+        &lt;exec executable="date" spawn="false" /&gt;
+    &lt;/target&gt;
+
+    &lt;target name="jar" depends="compile" description="make jar file"&gt;
+        &lt;jar
+            jarfile="${package}.jar"
+            basedir="${destdir}"
+            manifest="${package}.mf"&gt;
+            &lt;zipfileset src="${mvc}.jar" /&gt;
+        &lt;/jar&gt;
+        &lt;exec executable="date" spawn="false" /&gt;
+    &lt;/target&gt;
+
+    &lt;target name="clean" description="cleaning"&gt;
+        &lt;delete dir="${destdir}" /&gt;
+        &lt;delete file="${package}.jar" /&gt;
+        &lt;delete dir="${docdir}" /&gt;
+        &lt;delete dir="${instdir}" /&gt;
+        &lt;delete file="../${zipname}.zip" /&gt;
+        &lt;delete&gt;
+            &lt;fileset dir="${package}" includes="*.class" /&gt;
+        &lt;/delete&gt;
+        &lt;exec executable="date" spawn="false" /&gt;
+    &lt;/target&gt;
+
+    &lt;target name="test" depends="all,tree" description="test"&gt;
+        &lt;exec executable="date" spawn="false" /&gt;
+    &lt;/target&gt;
+
+    &lt;target name="tree" depends="all" description="tree"&gt;
+        &lt;exec executable="java" spawn="false"&gt;
+            &lt;arg line="-Dfile.encoding=UTF-8 -Xmx512m -Xss1024k -jar ${package}.jar resource/data/tree.txt" /&gt;
+        &lt;/exec&gt;
+        &lt;exec executable="date" spawn="false" /&gt;
+    &lt;/target&gt;
+
+    &lt;target name="forest" depends="all" description="forest"&gt;
+        &lt;exec executable="java" spawn="false"&gt;
+            &lt;arg line="-Dfile.encoding=UTF-8 -Xmx512m -Xss1024k -jar ${package}.jar resource/data/forest.txt" /&gt;
+        &lt;/exec&gt;
+        &lt;exec executable="date" spawn="false" /&gt;
+    &lt;/target&gt;
+
+    &lt;target name="semilattice" depends="all" description="semilattice"&gt;
+        &lt;exec executable="java" spawn="false"&gt;
+            &lt;arg line="-Dfile.encoding=UTF-8 -Xmx512m -Xss1024k -jar ${package}.jar resource/data/semilattice.txt" /&gt;
+        &lt;/exec&gt;
+        &lt;exec executable="date" spawn="false" /&gt;
+    &lt;/target&gt;
+
+    &lt;target name="install" depends="all" description="install into application"&gt;
+        &lt;copy file="${package}.jar" todir="${instdir}" /&gt;
+        &lt;copy file="resource/data/forest.txt" todir="${instdir}" /&gt;
+        &lt;exec executable="chmod"&gt;
+            &lt;arg line="755 ${instdir}/../../MacOS/applet" /&gt;
+        &lt;/exec&gt;
+        &lt;exec executable="date" spawn="false" /&gt;
+    &lt;/target&gt;
+
+    &lt;target name="doc" depends="all" description="make document (javadoc)"&gt;
+        &lt;mkdir dir="${docdir}" /&gt;
+        &lt;javadoc
+            locale="ja_JP"
+            sourcepath="${basedir}"
+            destdir="${docdir}"
+            packagenames="${packagenames}"
+            author="true"
+            version="true"
+            charset="UTF-8"
+            encoding="UTF-8"
+            docencoding="UTF-8"
+            linksource="yes"
+            additionalparam="-J-Dfile.encoding=UTF-8"
+            access="private"&gt;
+            &lt;doctitle&gt;${doc-title}&lt;/doctitle&gt;
+            &lt;bottom&gt;${copyright}&lt;/bottom&gt;
+            &lt;classpath&gt;
+                &lt;pathelement location="." /&gt;
+                &lt;pathelement location="${mvc}.jar" /&gt;
+            &lt;/classpath&gt;
+        &lt;/javadoc&gt;
+        &lt;exec executable="open"&gt;
+            &lt;arg line="-a /Applications/Safari.app ${docdir}/index.html" /&gt;
+        &lt;/exec&gt;
+        &lt;exec executable="date" spawn="false" /&gt;
+    &lt;/target&gt;
+
+    &lt;target name="zip" depends="clean" description="make zip file"&gt;
+        &lt;delete file="../${zipname}.zip" /&gt;
+        &lt;zip destfile="../${zipname}.zip"&gt;
+            &lt;zipfileset dir="." prefix="${zipname}" /&gt;
+        &lt;/zip&gt;
+        &lt;exec executable="date" spawn="false" /&gt;
+    &lt;/target&gt;
+
+
+    
+    &lt;property name="test.src.dir" value="Test"/&gt;
+    &lt;property name="test.build.dir" value="Classes_Test"/&gt;
+    &lt;property name="lib.dir" value="lib"/&gt;
+
+    &lt;path id="test.classpath"&gt;
+        &lt;pathelement location="${destdir}"/&gt;
+        &lt;pathelement location="${test.build.dir}"/&gt;
+        &lt;pathelement location="mvc.jar"/&gt;
+        &lt;fileset dir="${lib.dir}" includes="**/&zwj;*.jar"/&gt;
+    &lt;/path&gt;
+
+    &lt;target name="compile-tests" depends="compile"&gt;
+        &lt;mkdir dir="${test.build.dir}"/&gt;
+        &lt;javac srcdir="${test.src.dir}" destdir="${test.build.dir}" includeantruntime="false" encoding="UTF-8"&gt;
+            &lt;classpath refid="test.classpath"/&gt;
+        &lt;/javac&gt;
+    &lt;/target&gt;
+
+    &lt;target name="junit" depends="compile-tests"&gt;
+        &lt;junit printsummary="yes" haltonfailure="yes"&gt;
+            &lt;classpath refid="test.classpath"/&gt;
+            &lt;formatter type="plain" usefile="false" /&gt;
+            &lt;batchtest&gt;
+                &lt;fileset dir="${test.src.dir}" includes="**/&zwj;*Test.java"/&gt;
+            &lt;/batchtest&gt;
+        &lt;/junit&gt;
+    &lt;/target&gt;
+
+&lt;/project&gt;
+</code></pre>
 <hr>
 <div class="right-small">Copyright 2025 Project: software engineering II, Updated: 2025/07/30 (Created: 2025/07/27)</div>
 </body>
