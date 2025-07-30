@@ -35,6 +35,7 @@
 				<pathelement location="." />
 				<pathelement location="${mvc}.jar" />
 			</classpath>
+			<exclude name="Test/**"/>
 		</javac>
 		<exec executable="date" spawn="false" />
 	</target>
