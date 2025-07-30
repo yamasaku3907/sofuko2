@@ -133,7 +133,7 @@
 	</target>
 
 
-	<!-- ========== JUnit Test Targets ========== -->
+	
     <property name="test.src.dir" value="Test"/>
     <property name="test.build.dir" value="Classes_Test"/>
     <property name="lib.dir" value="lib"/>
